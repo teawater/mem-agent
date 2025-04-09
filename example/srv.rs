@@ -68,14 +68,14 @@ fn setup_logging(opt: &Opt) -> Result<slog_scope::GlobalLoggerGuard> {
     };
 
     let logger = Logger::root(drain, slog::o!());
-    Ok(set_global_logger(logger.clone()))
+    Ok(set_global_logger(logger))
 }
 
 fn main() -> Result<()> {
     // Check opt
     let opt = Opt::from_args();
 
-    let _ = setup_logging(&opt).map_err(|e| anyhow!("setup_logging fail: {}", e))?;
+    let _logger_guard = setup_logging(&opt).map_err(|e| anyhow!("setup_logging fail: {}", e))?;
 
     let memcg_config = opt.memcg.to_mem_agent_memcg_config();
     let compact_config = opt.compact.to_mem_agent_compact_config();
