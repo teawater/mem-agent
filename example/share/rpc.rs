@@ -178,7 +178,7 @@ pub async fn rpc_loop(agent: agent::MemAgent, addr: String) -> Result<()> {
     let c = Arc::new(c);
     let service = mem_agent_ttrpc::create_control(c);
 
-    let mut server = Server::new().bind(&addr).unwrap().register_service(service);
+    let mut server = Server::new().bind(&addr).map_err(|e| anyhow!("Server::new().bind {} fail: {}", addr, e))?.register_service(service);
 
     let metadata = fs::metadata(path).map_err(|e| anyhow!("fs::metadata {} fail: {}", path, e))?;
     let mut permissions = metadata.permissions();
