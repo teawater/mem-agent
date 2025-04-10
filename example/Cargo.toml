@@ -18,10 +18,9 @@ ttrpc = { version = "0.8", features = ["async"] }
 tokio = { version = "1.33", features = ["full"] }
 async-trait = "0.1"
 byteorder = "1.5"
-protobuf = "3.1"
+protobuf = "3.7"
 lazy_static = "1.4"
-# Rust 1.68 doesn't support 0.5.9
-home = "=0.5.5"
+home = "0.5"
 mem-agent = { path = "../" }
 
 [[example]]
@@ -33,4 +32,4 @@ name = "mem-agent-ctl"
 path = "./ctl.rs"
 
 [build-dependencies]
-ttrpc-codegen = "0.4"
+ttrpc-codegen = "0.5"

@@ -174,9 +174,7 @@ pub async fn rpc_loop(agent: agent::MemAgent, addr: String) -> Result<()> {
     }
 
     let control = MyControl::new(agent);
-    let c = Box::new(control) as Box<dyn mem_agent_ttrpc::Control + Send + Sync>;
-    let c = Arc::new(c);
-    let service = mem_agent_ttrpc::create_control(c);
+    let service = mem_agent_ttrpc::create_control(Arc::new(control));
 
     let mut server = Server::new().bind(&addr).map_err(|e| anyhow!("Server::new().bind {} fail: {}", addr, e))?.register_service(service);
 
