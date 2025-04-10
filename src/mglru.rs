@@ -17,7 +17,7 @@ const WORKINGSET_ANON: usize = 0;
 const WORKINGSET_FILE: usize = 1;
 const LRU_GEN_ENABLED_PATH: &str = "/sys/kernel/mm/lru_gen/enabled";
 const LRU_GEN_PATH: &str = "/sys/kernel/debug/lru_gen";
-const MEMCGS_PATH: &str = "/sys/fs/cgroup/memory";
+const MEMCGS_V1_PATH: &str = "/sys/fs/cgroup/memory";
 
 fn lru_gen_head_parse(line: &str) -> Result<(usize, String)> {
     let words: Vec<&str> = line.split_whitespace().map(|word| word.trim()).collect();
@@ -244,7 +244,7 @@ pub fn host_memcgs_get(
 
     let mut host_mgs = HashMap::new();
     for (path, (id, mglru)) in mgs {
-        let host_path = PathBuf::from(MEMCGS_PATH).join(path.trim_start_matches('/'));
+        let host_path = PathBuf::from(MEMCGS_V1_PATH).join(path.trim_start_matches('/'));
 
         let metadata = match fs::metadata(host_path.clone()) {
             Err(e) => {
