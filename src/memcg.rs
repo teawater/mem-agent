@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+use crate::cgroup::CGROUP_PATH;
 use crate::mglru::{self, MGenLRU};
 use crate::timer::Timeout;
 use crate::{debug, error, info, trace};
@@ -449,16 +450,23 @@ impl MemCgroups {
 
 #[derive(Debug, Clone)]
 pub struct MemCG {
+    is_cg_v2: bool,
     memcgs: Arc<RwLock<MemCgroups>>,
 }
 
 impl MemCG {
-    pub fn new(mut config: Config) -> Result<Self> {
+    pub fn new(is_cg_v2: bool, mut config: Config) -> Result<Self> {
         mglru::check().map_err(|e| anyhow!("mglru::check failed: {}", e))?;
+
+        if is_cg_v2 {
+            config.psi_path = PathBuf::from(CGROUP_PATH);
+        }
+
         config.psi_path =
             psi::check(&config.psi_path).map_err(|e| anyhow!("psi::check failed: {}", e))?;
 
         let memcg = Self {
+            is_cg_v2,
             memcgs: Arc::new(RwLock::new(MemCgroups::new(config))),
         };
 
@@ -471,7 +479,7 @@ impl MemCG {
      * If target_paths.len > 0, will not do that.
      */
     fn refresh(&mut self, target_paths: &HashSet<String>) -> Result<()> {
-        let mg_hash = mglru::host_memcgs_get(target_paths, true)
+        let mg_hash = mglru::host_memcgs_get(target_paths, true, self.is_cg_v2)
             .map_err(|e| anyhow!("lru_gen_parse::file_parse failed: {}", e))?;
 
         let mut mgs = self.memcgs.blocking_write();

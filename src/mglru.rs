@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+use crate::cgroup::CGROUP_PATH;
+use crate::cgroup::MEMCGS_V1_PATH;
 use crate::debug;
 use crate::warn;
 use anyhow::{anyhow, Result};
@@ -17,7 +19,6 @@ const WORKINGSET_ANON: usize = 0;
 const WORKINGSET_FILE: usize = 1;
 const LRU_GEN_ENABLED_PATH: &str = "/sys/kernel/mm/lru_gen/enabled";
 const LRU_GEN_PATH: &str = "/sys/kernel/debug/lru_gen";
-const MEMCGS_PATH: &str = "/sys/fs/cgroup/memory";
 
 fn lru_gen_head_parse(line: &str) -> Result<(usize, String)> {
     let words: Vec<&str> = line.split_whitespace().map(|word| word.trim()).collect();
@@ -238,13 +239,18 @@ fn file_parse(
 pub fn host_memcgs_get(
     target_patchs: &HashSet<String>,
     parse_line: bool,
+    is_cg_v2: bool,
 ) -> Result<HashMap<String, (usize, usize, HashMap<usize, MGenLRU>)>> {
     let mgs = file_parse(target_patchs, parse_line)
         .map_err(|e| anyhow!("mglru file_parse failed: {}", e))?;
 
     let mut host_mgs = HashMap::new();
     for (path, (id, mglru)) in mgs {
-        let host_path = PathBuf::from(MEMCGS_PATH).join(path.trim_start_matches('/'));
+        let host_path = if is_cg_v2 {
+            PathBuf::from(CGROUP_PATH).join(path.trim_start_matches('/'))
+        } else {
+            PathBuf::from(MEMCGS_V1_PATH).join(path.trim_start_matches('/'))
+        };
 
         let metadata = match fs::metadata(host_path.clone()) {
             Err(e) => {

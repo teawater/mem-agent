@@ -219,9 +219,18 @@ impl MemAgent {
         memcg_config: memcg::Config,
         compact_config: compact::Config,
     ) -> Result<(Self, Runtime)> {
-        let mg = memcg::MemCG::new(memcg_config)
+        let is_cg_v2 = crate::cgroup::is_cgroup_v2()?;
+        if is_cg_v2 {
+            info!("current host use cgroup v2");
+        } else {
+            info!("current host use cgroup v1");
+        }
+
+        let mg = memcg::MemCG::new(is_cg_v2, memcg_config)
             .map_err(|e| anyhow!("memcg::MemCG::new fail: {}", e))?;
 
+        // compact doesn't need care about cgroup version because
+        // it just use the psi file in the cgroup root.
         let comp = compact::Compact::new(compact_config)
             .map_err(|e| anyhow!("compact::Compact::new fail: {}", e))?;
 
