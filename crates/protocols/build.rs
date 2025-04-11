@@ -6,17 +6,17 @@ use ttrpc_codegen::{Codegen, Customize, ProtobufCustomize};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let protos = vec![
-        "protocols/protos/mem-agent.proto",
-        "protocols/protos/google/protobuf/empty.proto",
-        "protocols/protos/google/protobuf/timestamp.proto",
+        "src/protos/mem-agent.proto",
+        "src/protos/google/protobuf/empty.proto",
+        "src/protos/google/protobuf/timestamp.proto",
     ];
 
     let protobuf_customized = ProtobufCustomize::default().gen_mod_rs(false);
 
     Codegen::new()
-        .out_dir("protocols/")
+        .out_dir("src/")
         .inputs(&protos)
-        .include("protocols/protos/")
+        .include("src/protos/")
         .rust_protobuf()
         .customize(Customize {
             async_all: true,

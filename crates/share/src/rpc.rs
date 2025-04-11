@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::protocols::mem_agent as rpc_mem_agent;
-use crate::protocols::{empty, mem_agent_ttrpc};
+use protocols::mem_agent as rpc_mem_agent;
+use protocols::{empty, mem_agent_ttrpc};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
-use mem_agent::{agent, compact, memcg};
+use mem_agent_lib::{agent, compact, memcg};
 use slog_scope::{error, info};
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
@@ -42,7 +42,7 @@ fn mem_cgroup_to_mem_cgroup_rpc(mcg: &memcg::MemCgroup) -> rpc_mem_agent::MemCgr
                     *numa_id,
                     rpc_mem_agent::StatusNuma {
                         last_inc_time: protobuf::MessageField::some(
-                            crate::share::misc::datatime_to_timestamp(n.last_inc_time),
+                            crate::misc::datatime_to_timestamp(n.last_inc_time),
                         ),
                         max_seq: n.max_seq,
                         min_seq: n.min_seq,

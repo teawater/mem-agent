@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::protocols::mem_agent as rpc;
+use protocols::mem_agent as rpc;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -41,8 +41,8 @@ impl MemcgSetOption {
     }
 
     #[allow(dead_code)]
-    pub fn to_mem_agent_memcg_config(&self) -> mem_agent::memcg::Config {
-        let mut config = mem_agent::memcg::Config {
+    pub fn to_mem_agent_memcg_config(&self) -> mem_agent_lib::memcg::Config {
+        let mut config = mem_agent_lib::memcg::Config {
             ..Default::default()
         };
 
@@ -111,8 +111,8 @@ impl CompactSetOption {
     }
 
     #[allow(dead_code)]
-    pub fn to_mem_agent_compact_config(&self) -> mem_agent::compact::Config {
-        let mut config = mem_agent::compact::Config {
+    pub fn to_mem_agent_compact_config(&self) -> mem_agent_lib::compact::Config {
+        let mut config = mem_agent_lib::compact::Config {
             ..Default::default()
         };
 
