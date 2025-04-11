@@ -1,8 +1,7 @@
 /target
-/example/target
-/example/protocols/empty.rs
-/example/protocols/mem_agent.rs
-/example/protocols/mem_agent_ttrpc.rs
-/example/protocols/timestamp.rs
+/crates/protocols/src/empty.rs
+/crates/protocols/src/mem_agent.rs
+/crates/protocols/src/mem_agent_ttrpc.rs
+/crates/protocols/src/timestamp.rs
 /.vscode
 .vscode-ctags

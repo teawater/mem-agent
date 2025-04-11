@@ -52,9 +52,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.98"
+version = "1.0.97"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e16d2d3311acee920a9eb8d33b8cbc1787ce4a264e85f964c2404b969bdcd487"
+checksum = "dcfed56ad506cb2c684a14971b8861fdc3baaaae314b9e5f9bb532cbe3ba7a4f"
 
 [[package]]
 name = "arc-swap"
@@ -616,24 +616,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
-name = "mem-agent-ctl"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "libc",
- "mem-agent-lib",
- "protocols",
- "share",
- "slog",
- "slog-async",
- "slog-scope",
- "slog-term",
- "structopt",
- "tokio",
- "ttrpc",
-]
-
-[[package]]
 name = "mem-agent-lib"
 version = "0.1.0"
 dependencies = [
@@ -641,30 +623,11 @@ dependencies = [
  "async-trait",
  "chrono",
  "lazy_static",
- "maplit",
  "nix 0.23.2",
- "once_cell",
  "page_size",
  "slog",
- "slog-async",
  "slog-scope",
- "slog-term",
  "tokio",
-]
-
-[[package]]
-name = "mem-agent-srv"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "libc",
- "mem-agent-lib",
- "share",
- "slog",
- "slog-async",
- "slog-scope",
- "slog-term",
- "structopt",
 ]
 
 [[package]]

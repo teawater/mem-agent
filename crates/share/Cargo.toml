@@ -1,7 +1,7 @@
 [package]
-name = "mem-agent-bin"
+name = "share"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 slog = "2.5.2"
@@ -20,16 +20,6 @@ async-trait = "0.1"
 byteorder = "1.5"
 protobuf = "3.7"
 lazy_static = "1.4"
-home = "0.5"
-mem-agent = { path = "../" }
-
-[[example]]
-name = "mem-agent-srv"
-path = "./srv.rs"
-
-[[example]]
-name = "mem-agent-ctl"
-path = "./ctl.rs"
-
-[build-dependencies]
-ttrpc-codegen = "0.5"
+#home = "0.5"
+mem-agent-lib = { path = "../mem-agent-lib" }
+protocols = { path = "../protocols" }

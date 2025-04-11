@@ -2,9 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-mod protocols;
-mod share;
-
 use anyhow::{anyhow, Result};
 use protocols::empty;
 use protocols::mem_agent_ttrpc;

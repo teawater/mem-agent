@@ -616,24 +616,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
-name = "mem-agent-ctl"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "libc",
- "mem-agent-lib",
- "protocols",
- "share",
- "slog",
- "slog-async",
- "slog-scope",
- "slog-term",
- "structopt",
- "tokio",
- "ttrpc",
-]
-
-[[package]]
 name = "mem-agent-lib"
 version = "0.1.0"
 dependencies = [
@@ -641,14 +623,10 @@ dependencies = [
  "async-trait",
  "chrono",
  "lazy_static",
- "maplit",
  "nix 0.23.2",
- "once_cell",
  "page_size",
  "slog",
- "slog-async",
  "slog-scope",
- "slog-term",
  "tokio",
 ]
 

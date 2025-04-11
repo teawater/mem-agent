@@ -641,30 +641,11 @@ dependencies = [
  "async-trait",
  "chrono",
  "lazy_static",
- "maplit",
  "nix 0.23.2",
- "once_cell",
  "page_size",
  "slog",
- "slog-async",
  "slog-scope",
- "slog-term",
  "tokio",
-]
-
-[[package]]
-name = "mem-agent-srv"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "libc",
- "mem-agent-lib",
- "share",
- "slog",
- "slog-async",
- "slog-scope",
- "slog-term",
- "structopt",
 ]
 
 [[package]]

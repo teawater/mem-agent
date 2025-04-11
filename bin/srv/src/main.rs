@@ -13,9 +13,6 @@ use std::fs::OpenOptions;
 use std::io::BufWriter;
 use structopt::StructOpt;
 
-mod protocols;
-mod share;
-
 #[derive(StructOpt, Debug)]
 #[structopt(name = "mem-agent", about = "Memory agent")]
 struct Opt {
@@ -80,7 +77,7 @@ fn main() -> Result<()> {
     let memcg_config = opt.memcg.to_mem_agent_memcg_config();
     let compact_config = opt.compact.to_mem_agent_compact_config();
 
-    let (ma, _rt) = mem_agent::agent::MemAgent::new(memcg_config, compact_config)
+    let (ma, _rt) = mem_agent_lib::agent::MemAgent::new(memcg_config, compact_config)
         .map_err(|e| anyhow!("MemAgent::new fail: {}", e))?;
 
     info!("MemAgent started");
