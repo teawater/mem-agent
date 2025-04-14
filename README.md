@@ -5,7 +5,8 @@ It can be executed as a standalone executable file or integrated as a rust libra
 The mem-agent has been integrated into the kata-agent as a library.
 https://github.com/kata-containers/kata-containers/blob/main/docs/how-to/how-to-use-memory-agent.md
 
-# Features
+The following are the features of the mem-agent:
+
 ## Feature MemCG
 Use the Linux kernel MgLRU feature to monitor each cgroup's memory usage and periodically reclaim cold memory.
 
@@ -28,8 +29,6 @@ During memory reclamation and compaction, mem-agent monitors system pressure usi
 If the system pressure becomes too high, memory reclamation or compaction will automatically stop.
 
 This feature helps the mem-agent reduce its overhead on system performance.
-
-**The configuration of PSI functions is integrated with other features.**
 
 # Quick start
 Make sure current Linux kernel open PSI and mgLRU option.
