@@ -50,17 +50,6 @@ sudo target/debug/mem-agent-srv
 
 # Configurations
 ## Feature MemCG
-Use the Linux kernel MgLRU feature to monitor each cgroup's memory usage and periodically reclaim cold memory.
-
-During each run period, memcg calls the run_aging function of MgLRU for each cgroup to mark the hot and cold states of the pages within it.<br>
-Then, it calls the run_eviction function of MgLRU for each cgroup to reclaim a portion of the cold pages that have not been accessed for three periods.
-
-After the run period, the memcg will enter a sleep period. Once the sleep period is over, it will transition into the next run period, and this cycle will continue.
-
-Before the memcg run period and when reclaim the memory, MemCG will use PSI feature to check the system pressure and stop the memcg run period if the system pressure exceeds the configured limit.
-
-**The following are the configurations of the Feature MemCG:**
-
 ### memcg_disable
 Control the mem-agent memcg function disable or enable.<br>
 Default to false.
@@ -86,9 +75,7 @@ sudo target/debug/mem-agent-srv --memcg-swap true
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentMemcgSet json://{"swap":true}'
+sudo target/debug/mem-agent-ctl memcgset --memcg-disabled true
 ```
 
 ### memcg_swappiness_max
@@ -104,9 +91,7 @@ sudo target/debug/mem-agent-srv --memcg-disabled true
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentMemcgSet json://{"swappiness_max":50}'
+sudo target/debug/mem-agent-ctl memcgset --memcg-disabled true
 ```
 
 ### memcg_period_secs
@@ -120,9 +105,7 @@ sudo target/debug/mem-agent-srv --memcg-disabled true
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentMemcgSet json://{"period_secs":600}'
+sudo target/debug/mem-agent-ctl memcgset --memcg-disabled true
 ```
 
 ### memcg_period_psi_percent_limit
