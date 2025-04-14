@@ -11,17 +11,8 @@ slog-async = "2.7"
 structopt = "0.3"
 anyhow = "1.0"
 libc = "0.2"
-#page_size = "0.6"
-#chrono = "0.4"
-#maplit = "1.0"
 ttrpc = { version = "0.8", features = ["async"] }
 tokio = { version = "1.33", features = ["full"] }
-#async-trait = "0.1"
-#byteorder = "1.5"
-#protobuf = "3.7"
-#lazy_static = "1.4"
-#home = "0.5"
-#mem-agent = { path = "../" }
 
 share = {path = "../../crates/share"}
 protocols = {path = "../../crates/protocols"}
