@@ -60,7 +60,7 @@ impl Default for Config {
             period_secs: 10 * 60,
             period_psi_percent_limit: 1,
             compact_psi_percent_limit: 5,
-            compact_sec_max: 30 * 60,
+            compact_sec_max: 5 * 60,
             compact_order: PAGE_REPORTING_MIN_ORDER,
             compact_threshold: 2 << PAGE_REPORTING_MIN_ORDER,
             compact_force_times: std::u64::MAX,

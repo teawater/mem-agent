@@ -215,16 +215,16 @@ sudo target/debug/mem-agent-ctl compactset --compact-psi-percent-limit 1
 Control the maximum number of seconds for each compaction of mem-agent compact function.<br>
 If compaction seconds is bigger than compact_sec_max during compact run period, stop compaction at once.
 
-Default to 180.
+Default to 300.
 
 Set memcg_disable when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --compact-sec-max 180
+sudo target/debug/mem-agent-srv --compact-sec-max 300
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-sudo target/debug/mem-agent-ctl compactset --compact-sec-max 180
+sudo target/debug/mem-agent-ctl compactset --compact-sec-max 300
 ```
 
 ### compact_order
