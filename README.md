@@ -74,7 +74,7 @@ sudo target/debug/mem-agent-srv --memcg-swap true
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-sudo target/debug/mem-agent-ctl memcgset --memcg-disabled true
+sudo target/debug/mem-agent-ctl memcgset --memcg-swap true
 ```
 
 ### memcg_swappiness_max
@@ -85,12 +85,12 @@ Default to 50.
 
 Set this configuration when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --memcg-swappiness-max 50
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-sudo target/debug/mem-agent-ctl memcgset --memcg-disabled true
+sudo target/debug/mem-agent-ctl memcgset --memcg-swappiness-max 50
 ```
 
 ### memcg_period_secs
@@ -99,12 +99,12 @@ Default to 600.
 
 Set this configuration when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --memcg-period-secs 600
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-sudo target/debug/mem-agent-ctl memcgset --memcg-disabled true
+sudo target/debug/mem-agent-ctl memcgset --memcg-period-secs 600
 ```
 
 ### memcg_period_psi_percent_limit
@@ -114,14 +114,12 @@ Default to 1
 
 Set this configuration when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --memcg-period-psi-percent-limit 1
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentMemcgSet json://{"period_psi_percent_limit":1}'
+sudo target/debug/mem-agent-ctl memcgset --memcg-period-psi-percent-limit 1
 ```
 
 ### memcg_eviction_psi_percent_limit
@@ -131,14 +129,12 @@ Default to 1.
 
 Set this configuration when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --memcg-eviction-psi-percent-limit 1
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentMemcgSet json://{"eviction_psi_percent_limit":1}'
+sudo target/debug/mem-agent-ctl memcgset --memcg-eviction-psi-percent-limit 1
 ```
 
 ### memcg_eviction_run_aging_count_min
@@ -148,14 +144,12 @@ Default to 3.
 
 Set this configuration when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --memcg-eviction-run-aging-count-min 3
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentMemcgSet json://{"eviction_run_aging_count_min":3}'
+sudo target/debug/mem-agent-ctl memcgset --memcg-eviction-run-aging-count-min 3
 ```
 
 ## Feature compact
@@ -165,14 +159,12 @@ Default to false.
 
 Set memcg_disable when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --compact-disabled true
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentCompactSet json://{"disabled":false}'
+sudo target/debug/mem-agent-ctl compactset --compact-disabled true
 ```
 
 ### compact_period_secs
@@ -181,14 +173,12 @@ Default to 600.
 
 Set memcg_disable when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --compact-period-secs 600
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentCompactSet json://{"period_secs":600}'
+sudo target/debug/mem-agent-ctl compactset --compact-period-secs 600
 ```
 
 ### compact_period_psi_percent_limit
@@ -198,12 +188,12 @@ Default to 1.
 
 Set memcg_disable when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --compact-period-psi-percent-limit 1
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-ctl compactset --compact-period-psi-percent-limit 1
 ```
 
 ### compact_psi_percent_limit
@@ -213,14 +203,12 @@ Default to 5
 
 Set memcg_disable when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --compact-psi-percent-limit 1
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentCompactSet json://{"compact_psi_percent_limit":5}'
+sudo target/debug/mem-agent-ctl compactset --compact-psi-percent-limit 1
 ```
 
 ### compact_sec_max
@@ -231,14 +219,12 @@ Default to 180.
 
 Set memcg_disable when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --compact-sec-max 180
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentCompactSet json://{"compact_sec_max":180}'
+sudo target/debug/mem-agent-ctl compactset --compact-sec-max 180
 ```
 
 ### compact_order
@@ -249,14 +235,12 @@ Default to 9.
 
 Set memcg_disable when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --compact-order 9
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentCompactSet json://{"compact_order":9}'
+sudo target/debug/mem-agent-ctl compactset --compact-order 9
 ```
 
 ### compact_threshold
@@ -268,14 +252,12 @@ Default to 1024.
 
 Set memcg_disable when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --compact-threshold 1024
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentCompactSet json://{"compact_threshold":1024}'
+sudo target/debug/mem-agent-ctl compactset --compact-threshold 1024
 ```
 
 ### compact_force_times
@@ -287,12 +269,10 @@ Default to 18446744073709551615.
 
 Set memcg_disable when start mem-agent-srv:
 ```bash
-sudo target/debug/mem-agent-srv --memcg-disabled true
+sudo target/debug/mem-agent-srv --compact-force-times 18446744073709551615
 ```
 
 For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
 ```bash
-$ PODID="12345"
-$ kata-agent-ctl connect --server-address "unix:///var/run/kata/$PODID/root/kata.hvsock" --hybrid-vsock \
---cmd 'MemAgentCompactSet json://{"compact_force_times":18446744073709551615}'
+sudo target/debug/mem-agent-ctl compactset --compact-force-times 18446744073709551615
 ```
