@@ -229,9 +229,7 @@ impl MemAgent {
         let mg = memcg::MemCG::new(is_cg_v2, memcg_config)
             .map_err(|e| anyhow!("memcg::MemCG::new fail: {}", e))?;
 
-        // compact doesn't need care about cgroup version because
-        // it just use the psi file in the cgroup root.
-        let comp = compact::Compact::new(compact_config)
+        let comp = compact::Compact::new(is_cg_v2, compact_config)
             .map_err(|e| anyhow!("compact::Compact::new fail: {}", e))?;
 
         let (cmd_tx, cmd_rx) = mpsc::channel(10);

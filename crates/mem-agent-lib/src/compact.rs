@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+use crate::cgroup::CGROUP_PATH;
 use crate::proc;
 use crate::psi;
 use crate::timer::Timeout;
@@ -238,7 +239,11 @@ pub struct Compact {
 }
 
 impl Compact {
-    pub fn new(mut config: Config) -> Result<Self> {
+    pub fn new(is_cg_v2: bool, mut config: Config) -> Result<Self> {
+        if is_cg_v2 {
+            config.psi_path = PathBuf::from(CGROUP_PATH);
+        }
+
         config.psi_path =
             psi::check(&config.psi_path).map_err(|e| anyhow!("psi::check failed: {}", e))?;
 
