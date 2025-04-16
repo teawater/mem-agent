@@ -445,7 +445,8 @@ mod tests {
 
     #[test]
     fn test_compact() {
-        let mut c = Compact::new(Config::default()).unwrap();
+        let is_cg_v2 = crate::cgroup::is_cgroup_v2().unwrap();
+        let mut c = Compact::new(is_cg_v2, Config::default()).unwrap();
         assert!(c.work().is_ok());
     }
 }

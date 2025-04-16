@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use anyhow::{anyhow, Result};
-use share::option::{CompactSetOption, MemcgSetOption};
+use share::option::{CompactSetOption, MemcgSetupOption};
 use slog::{Drain, Level, Logger};
 use slog_async;
 use slog_scope::set_global_logger;
@@ -23,7 +23,7 @@ struct Opt {
     #[structopt(long, default_value = "trace", parse(try_from_str = parse_slog_level))]
     log_level: Level,
     #[structopt(flatten)]
-    memcg: MemcgSetOption,
+    memcg: MemcgSetupOption,
     #[structopt(flatten)]
     compact: CompactSetOption,
 }

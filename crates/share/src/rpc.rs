@@ -2,12 +2,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-use protocols::mem_agent as rpc_mem_agent;
-use protocols::{empty, mem_agent_ttrpc};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use mem_agent_lib::{agent, compact, memcg};
+use protocols::mem_agent as rpc_mem_agent;
+use protocols::{empty, mem_agent_ttrpc};
 use slog_scope::{error, info};
+use std::collections::HashMap;
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::sync::Arc;
@@ -28,12 +29,11 @@ impl MyControl {
     }
 }
 
-fn mem_cgroup_to_mem_cgroup_rpc(mcg: &memcg::MemCgroup) -> rpc_mem_agent::MemCgroup {
+fn mem_cgroup_to_rpc_mem_cgroup(path: &str, mcg: &memcg::MemCgroup) -> rpc_mem_agent::MemCgroup {
     rpc_mem_agent::MemCgroup {
         id: mcg.id as u32,
         ino: mcg.ino as u64,
-        path: mcg.path.clone(),
-        sleep_psi_exceeds_limit: mcg.sleep_psi_exceeds_limit,
+        path: path.to_string(),
         numa: mcg
             .numa
             .iter()
@@ -58,6 +58,7 @@ fn mem_cgroup_to_mem_cgroup_rpc(mcg: &memcg::MemCgroup) -> rpc_mem_agent::MemCgr
                                 ..Default::default()
                             },
                         ),
+                        sleep_psi_exceeds_limit: n.sleep_psi_exceeds_limit,
                         ..Default::default()
                     },
                 )
@@ -67,12 +68,12 @@ fn mem_cgroup_to_mem_cgroup_rpc(mcg: &memcg::MemCgroup) -> rpc_mem_agent::MemCgr
     }
 }
 
-fn mem_cgroups_to_memcg_status_reply(
-    mgs: Vec<memcg::MemCgroup>,
+fn mem_cgroups_to_rpc_memcg_status(
+    mgs: HashMap<String, memcg::MemCgroup>,
 ) -> rpc_mem_agent::MemcgStatusReply {
     let mem_cgroups: Vec<rpc_mem_agent::MemCgroup> = mgs
         .iter()
-        .map(|x| mem_cgroup_to_mem_cgroup_rpc(&x))
+        .map(|(path, x)| mem_cgroup_to_rpc_mem_cgroup(path, &x))
         .collect();
 
     rpc_mem_agent::MemcgStatusReply {
@@ -81,16 +82,51 @@ fn mem_cgroups_to_memcg_status_reply(
     }
 }
 
-fn memcgconfig_to_memcg_optionconfig(mc: &rpc_mem_agent::MemcgConfig) -> memcg::OptionConfig {
+fn rpc_memcg_single_config_to_single_option_config(
+    sc: &rpc_mem_agent::MemcgSingleConfig,
+) -> memcg::SingleOptionConfig {
+    memcg::SingleOptionConfig {
+        disabled: sc.disabled,
+        swap: sc.swap,
+        swappiness_max: sc.swappiness_max.map(|val| val as u8),
+        period_secs: sc.period_secs,
+        period_psi_percent_limit: sc.period_psi_percent_limit.map(|val| val as u8),
+        eviction_psi_percent_limit: sc.eviction_psi_percent_limit.map(|val| val as u8),
+        eviction_run_aging_count_min: sc.eviction_run_aging_count_min,
+    }
+}
+
+fn rpc_memcg_config_item_to_cgroup_option_config(
+    item: &rpc_mem_agent::MemcgConfigItem,
+) -> memcg::CgroupOptionConfig {
+    memcg::CgroupOptionConfig {
+        path: item.path.clone(),
+        numa_id: item.numa.clone(),
+        no_subdir: item.no_subdir,
+        config: rpc_memcg_single_config_to_single_option_config(&item.config),
+    }
+}
+
+fn rpc_memcg_config_to_memcg_optionconfig(mc: &rpc_mem_agent::MemcgConfig) -> memcg::OptionConfig {
     let moc = memcg::OptionConfig {
-        disabled: mc.disabled,
-        swap: mc.swap,
-        swappiness_max: mc.swappiness_max.map(|val| val as u8),
-        period_secs: mc.period_secs,
-        period_psi_percent_limit: mc.period_psi_percent_limit.map(|val| val as u8),
-        eviction_psi_percent_limit: mc.eviction_psi_percent_limit.map(|val| val as u8),
-        eviction_run_aging_count_min: mc.eviction_run_aging_count_min,
-        ..Default::default()
+        del: mc
+            .del
+            .iter()
+            .map(|p| (p.path.clone(), p.numa.clone()))
+            .collect(),
+        add: mc
+            .add
+            .clone()
+            .into_iter()
+            .map(|item| rpc_memcg_config_item_to_cgroup_option_config(&item))
+            .collect(),
+        set: mc
+            .set
+            .clone()
+            .into_iter()
+            .map(|item| rpc_memcg_config_item_to_cgroup_option_config(&item))
+            .collect(),
+        default: rpc_memcg_single_config_to_single_option_config(&mc.default),
     };
 
     moc
@@ -121,7 +157,7 @@ impl mem_agent_ttrpc::Control for MyControl {
         _ctx: &::ttrpc::r#async::TtrpcContext,
         _: empty::Empty,
     ) -> ::ttrpc::Result<rpc_mem_agent::MemcgStatusReply> {
-        Ok(mem_cgroups_to_memcg_status_reply(
+        Ok(mem_cgroups_to_rpc_memcg_status(
             self.agent.memcg_status_async().await.map_err(|e| {
                 let estr = format!("agent.memcg_status_async fail: {}", e);
                 error!("{}", estr);
@@ -136,7 +172,7 @@ impl mem_agent_ttrpc::Control for MyControl {
         mc: rpc_mem_agent::MemcgConfig,
     ) -> ::ttrpc::Result<empty::Empty> {
         self.agent
-            .memcg_set_config_async(memcgconfig_to_memcg_optionconfig(&mc))
+            .memcg_set_config_async(rpc_memcg_config_to_memcg_optionconfig(&mc))
             .await
             .map_err(|e| {
                 let estr = format!("agent.memcg_set_config_async fail: {}", e);
@@ -176,7 +212,10 @@ pub async fn rpc_loop(agent: agent::MemAgent, addr: String) -> Result<()> {
     let control = MyControl::new(agent);
     let service = mem_agent_ttrpc::create_control(Arc::new(control));
 
-    let mut server = Server::new().bind(&addr).map_err(|e| anyhow!("Server::new().bind {} fail: {}", addr, e))?.register_service(service);
+    let mut server = Server::new()
+        .bind(&addr)
+        .map_err(|e| anyhow!("Server::new().bind {} fail: {}", addr, e))?
+        .register_service(service);
 
     let metadata = fs::metadata(path).map_err(|e| anyhow!("fs::metadata {} fail: {}", path, e))?;
     let mut permissions = metadata.permissions();

@@ -12,6 +12,7 @@ chrono = "0.4"
 tokio = { version = "1.33", features = ["full"] }
 async-trait = "0.1"
 lazy_static = "1.4"
+maplit = "1.0"
 nix = "0.23.2"
 
 [dev-dependencies]
