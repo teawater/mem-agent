@@ -36,7 +36,7 @@ Make sure current Linux kernel open PSI and mgLRU option.
 CONFIG_PSI=y
 CONFIG_LRU_GEN=y
 ```
-To build mem-agent, make sure Rust is installed.
+To build mem-agent, make sure Rust 1.75 or newer version is installed (https://www.rust-lang.org/tools/install).
 ```
 cd mem-agent
 make
