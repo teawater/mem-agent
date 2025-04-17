@@ -1,3 +1,4 @@
+Cargo.lock
 /target
 /crates/protocols/src/empty.rs
 /crates/protocols/src/mem_agent.rs
