@@ -4,8 +4,7 @@
 
 use crate::cgroup::CGROUP_PATH;
 use crate::cgroup::MEMCGS_V1_PATH;
-use crate::debug;
-use crate::warn;
+use crate::{debug, trace, warn};
 use anyhow::{anyhow, Result};
 use chrono::{DateTime, Duration, Utc};
 use std::collections::HashMap;
@@ -307,7 +306,7 @@ pub fn run_aging(
         "+ {} {} {} {} {}",
         memcg_id, numa_id, max_seq, can_swap as i32, force_scan as i32
     );
-    //trace!("send cmd {} to {}", cmd, LRU_GEN_PATH);
+    trace!("send cmd {} to {}", cmd, LRU_GEN_PATH);
     fs::write(LRU_GEN_PATH, &cmd)
         .map_err(|e| anyhow!("write file {} cmd {} failed: {}", LRU_GEN_PATH, cmd, e))?;
     Ok(())
@@ -324,7 +323,7 @@ pub fn run_eviction(
         "- {} {} {} {} {}",
         memcg_id, numa_id, min_seq, swappiness, nr_to_reclaim
     );
-    //trace!("send cmd {} to {}", cmd, LRU_GEN_PATH);
+    trace!("send cmd {} to {}", cmd, LRU_GEN_PATH);
     fs::write(LRU_GEN_PATH, &cmd)
         .map_err(|e| anyhow!("write file {} cmd {} failed: {}", LRU_GEN_PATH, cmd, e))?;
     Ok(())

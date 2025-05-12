@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-slog = "2.5.2"
 slog-scope = "4.1.2"
 slog-term = "2.9.0"
 slog-async = "2.7"
@@ -22,3 +21,7 @@ protobuf = "3.7"
 lazy_static = "1.4"
 mem-agent-lib = { path = "../mem-agent-lib" }
 protocols = { path = "../protocols" }
+
+[dependencies.slog]
+version = "2.7"
+features = ["release_max_level_trace", "max_level_trace"]

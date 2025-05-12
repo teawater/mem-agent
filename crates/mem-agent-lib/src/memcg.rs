@@ -381,7 +381,7 @@ impl MemCgroup {
                 .collect(),
         };
 
-        info!("MemCgroup::new {:?}", m);
+        debug!("MemCgroup::new {:?}", m);
         m
     }
 
@@ -564,7 +564,7 @@ impl MemCgroups {
     ) {
         for (path, (id, ino, hmg)) in mg_hash {
             if *id == 0 {
-                info!(
+                debug!(
                     "Not add {} {} {} because it is disabled.",
                     *id,
                     *ino,
@@ -702,10 +702,10 @@ impl MemCgroups {
                 }
             }
         } else {
-            debug!("check_psi_get_info: second {} is not exist", sec);
+            debug!("check_psi_get_infos second {} is not exist", sec);
         }
 
-        debug!("check_psi_get_info second {} {:?}", sec, infos_ret);
+        debug!("check_psi_get_infos second {} {:?}", sec, infos_ret);
 
         infos_ret
     }
@@ -995,6 +995,7 @@ impl MemCG {
 
     fn run_aging(&mut self, config_infov: &mut Vec<(SingleConfig, Vec<Info>)>) {
         for (config, infov) in config_infov.iter_mut() {
+            debug!("run_aging_single_config {:?}", config);
             self.run_aging_single_config(infov, config.swap);
         }
     }
@@ -1057,6 +1058,7 @@ impl MemCG {
 
     fn run_eviction(&mut self, config_infov: &mut Vec<(SingleConfig, Vec<Info>)>) -> Result<()> {
         for (config, infov) in config_infov.iter_mut() {
+            debug!("run_eviction_single_config {:?}", config);
             self.run_eviction_single_config(infov, &config)?;
         }
 

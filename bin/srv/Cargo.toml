@@ -4,7 +4,6 @@ version = "0.2.0"
 edition = "2021"
 
 [dependencies]
-slog = "2.5.2"
 slog-scope = "4.1.2"
 slog-term = "2.9.0"
 slog-async = "2.7"
@@ -14,3 +13,7 @@ libc = "0.2"
 
 share = {path = "../../crates/share"}
 mem-agent-lib = { path = "../../crates/mem-agent-lib" }
+
+[dependencies.slog]
+version = "2.7"
+features = ["release_max_level_trace", "max_level_trace"]

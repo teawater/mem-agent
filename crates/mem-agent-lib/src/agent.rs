@@ -4,7 +4,7 @@
 
 use crate::compact;
 use crate::memcg::{self, MemCgroup};
-use crate::{error, info};
+use crate::{debug, error, info};
 use anyhow::{anyhow, Result};
 use std::collections::HashMap;
 use std::thread;
@@ -69,6 +69,11 @@ fn get_remaining_tokio_duration(memcg: &memcg::MemCG, comp: &compact::Compact) -
     let memcg_d = memcg.get_remaining_tokio_duration();
     let comp_d = comp.get_remaining_tokio_duration();
 
+    debug!(
+        "get_remaining_tokio_duration: memcg_d={:?}, comp_d={:?}",
+        memcg_d, comp_d
+    );
+
     if memcg_d > comp_d {
         comp_d
     } else {
@@ -85,6 +90,11 @@ async fn async_get_remaining_tokio_duration(
 
     let memcg_d = memcg_f.await;
     let comp_d = comp_f.await;
+
+    debug!(
+        "async_get_remaining_tokio_duration: memcg_d={:?}, comp_d={:?}",
+        memcg_d, comp_d
+    );
 
     if memcg_d > comp_d {
         comp_d
@@ -143,6 +153,8 @@ impl MemAgentSleep {
     }
 
     fn set_sleep(&mut self, d: Duration) {
+        info!("MemAgentSleep::set_sleep: {:?}", d);
+
         self.duration = d;
         self.start_wait_time = Instant::now();
     }
