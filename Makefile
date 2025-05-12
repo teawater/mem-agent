@@ -9,4 +9,6 @@ default:
 
 clean:
 	cargo clean
- 
+
+test:
+	sudo -E env "PATH=$$PATH" cargo test
