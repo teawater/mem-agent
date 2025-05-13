@@ -572,10 +572,19 @@ impl MemCgroups {
                 )
             }
 
-            if let Some(mg) = self.cgroups.get_mut(path) {
-                // Update current
-                mg.update_from_hostmemcg(&hmg);
+            let need_insert = if update_cgroups {
+                if let Some(mg) = self.cgroups.get_mut(path) {
+                    // Update current
+                    mg.update_from_hostmemcg(&hmg);
+                    false
+                } else {
+                    true
+                }
             } else {
+                true
+            };
+
+            if need_insert {
                 // Create new and insert
                 // Get the configs(numa may have different configs) for this memcg
                 let numa_configs = self
@@ -587,14 +596,17 @@ impl MemCgroups {
                         if let Some(secs_config_map) = self.config_map.get_mut(&config.period_secs)
                         {
                             if let Some(config_map) = secs_config_map.cgs.get_mut(&config) {
-                                //
-
                                 if let Some(_) = config_map.get_mut(path) {
                                     error!(
                                         "update_and_add found an memcg {:?} {} existed",
                                         config, path
                                     );
                                 } else {
+                                    debug!(
+                                        "update_and_add: add new config_map {:?} {} {} {}",
+                                        config, path, *id, *ino
+                                    );
+
                                     config_map.insert(
                                         path.clone(),
                                         NumaMap {
@@ -607,6 +619,11 @@ impl MemCgroups {
                                     if update_cgroups {
                                         // update cgroups
                                         if let Some(cgroups) = self.cgroups.get_mut(path) {
+                                            debug!(
+                                                "update_and_add: add new cgroup {} {:?}",
+                                                path, numa_id
+                                            );
+
                                             cgroups.add_numa(
                                                 &numa_id,
                                                 path,
@@ -614,6 +631,11 @@ impl MemCgroups {
                                                 hmg,
                                             );
                                         } else {
+                                            debug!(
+                                                "update_and_add: add new cgroup {} {:?}",
+                                                path, numa_id
+                                            );
+
                                             self.cgroups.insert(
                                                 path.clone(),
                                                 MemCgroup::new(
@@ -790,6 +812,13 @@ impl MemCgroups {
 
         for (_, secs_map) in &self.config_map {
             let cur = secs_map.timeout.remaining_tokio_duration();
+
+            trace!(
+                "get_remaining_tokio_duration: secs_map {:?} remaining_tokio_duration {:?}",
+                secs_map,
+                cur
+            );
+
             if cur < ret {
                 // check secs_map, make sure it has enabled config
                 let mut has_enable_config = false;
@@ -913,6 +942,7 @@ impl MemCgroups {
         }
 
         info!("new memcg config: {:#?}", self.config);
+        trace!("new memcg config_map: {:#?}", self.config_map);
         if need_reset {
             info!("need reset mem-agent sleep");
         }
