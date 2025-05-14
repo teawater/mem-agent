@@ -4,13 +4,8 @@
 
 use anyhow::{anyhow, Result};
 use share::option::{CompactSetOption, MemcgSetupOption};
-use slog::{Drain, Level, Logger};
-use slog_async;
-use slog_scope::set_global_logger;
+use slog::Level;
 use slog_scope::{error, info};
-use slog_term;
-use std::fs::OpenOptions;
-use std::io::BufWriter;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
@@ -20,7 +15,7 @@ struct Opt {
     addr: String,
     #[structopt(long)]
     log_file: Option<String>,
-    #[structopt(long, default_value = "trace", parse(try_from_str = parse_slog_level))]
+    #[structopt(long, default_value = "trace", parse(try_from_str = share::logger::parse_slog_level))]
     log_level: Level,
     #[structopt(flatten)]
     memcg: MemcgSetupOption,
@@ -28,51 +23,12 @@ struct Opt {
     compact: CompactSetOption,
 }
 
-fn parse_slog_level(src: &str) -> Result<Level, String> {
-    match src.to_lowercase().as_str() {
-        "trace" => Ok(Level::Trace),
-        "debug" => Ok(Level::Debug),
-        "info" => Ok(Level::Info),
-        "warning" => Ok(Level::Warning),
-        "warn" => Ok(Level::Warning),
-        "error" => Ok(Level::Error),
-        _ => Err(format!("Invalid log level: {}", src)),
-    }
-}
-
-fn setup_logging(opt: &Opt) -> Result<slog_scope::GlobalLoggerGuard> {
-    let drain = if let Some(f) = &opt.log_file {
-        let log_file = OpenOptions::new()
-            .create(true)
-            .write(true)
-            .append(true)
-            .open(f)
-            .map_err(|e| anyhow!("Open log file {} fail: {}", f, e))?;
-        let buffered = BufWriter::new(log_file);
-        let decorator = slog_term::PlainDecorator::new(buffered);
-        let drain = slog_term::CompactFormat::new(decorator)
-            .build()
-            .filter_level(opt.log_level)
-            .fuse();
-        slog_async::Async::new(drain).build().fuse()
-    } else {
-        let decorator = slog_term::TermDecorator::new().stderr().build();
-        let drain = slog_term::CompactFormat::new(decorator)
-            .build()
-            .filter_level(opt.log_level)
-            .fuse();
-        slog_async::Async::new(drain).build().fuse()
-    };
-
-    let logger = Logger::root(drain, slog::o!());
-    Ok(set_global_logger(logger))
-}
-
 fn main() -> Result<()> {
     // Check opt
     let opt = Opt::from_args();
 
-    let _logger_guard = setup_logging(&opt).map_err(|e| anyhow!("setup_logging fail: {}", e))?;
+    let _logger_guard = share::logger::setup_logging(&opt.log_file, opt.log_level)
+        .map_err(|e| anyhow!("setup_logging fail: {}", e))?;
 
     let memcg_config = opt.memcg.to_mem_agent_memcg_config();
     let compact_config = opt.compact.to_mem_agent_compact_config();

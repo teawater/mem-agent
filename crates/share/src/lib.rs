@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+pub mod logger;
 pub mod misc;
 pub mod option;
 pub mod rpc;

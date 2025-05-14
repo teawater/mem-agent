@@ -197,6 +197,21 @@ impl mem_agent_ttrpc::Control for MyControl {
             })?;
         Ok(empty::Empty::new())
     }
+
+    async fn log_level_set(
+        &self,
+        _ctx: &::ttrpc::r#async::TtrpcContext,
+        ll: rpc_mem_agent::LogLevel,
+    ) -> ::ttrpc::Result<empty::Empty> {
+        crate::logger::set_log_level(&ll.level).await.map_err(|e| {
+            Error::RpcStatus(ttrpc::get_status(
+                Code::INTERNAL,
+                format!("set_log_level fail: {}", e),
+            ))
+        })?;
+
+        Ok(empty::Empty::new())
+    }
 }
 
 #[allow(dead_code)]

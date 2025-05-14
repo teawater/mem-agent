@@ -4,10 +4,20 @@
 
 use anyhow::{anyhow, Result};
 use protocols::empty;
-use protocols::mem_agent_ttrpc;
+use protocols::{mem_agent, mem_agent_ttrpc};
 use share::option::{CompactSetOption, MemcgSetOption};
 use structopt::StructOpt;
 use ttrpc::r#async::Client;
+
+#[derive(StructOpt, Debug)]
+#[structopt(name = "mem-agent-ctl", about = "Memory agent controler")]
+struct Opt {
+    #[structopt(long, default_value = "unix:///var/run/mem-agent.sock")]
+    addr: String,
+
+    #[structopt(subcommand)]
+    command: Command,
+}
 
 #[derive(Debug, StructOpt)]
 enum Command {
@@ -19,16 +29,15 @@ enum Command {
 
     #[structopt(name = "compactset", about = "set compact")]
     CompactSet(CompactSetOption),
+
+    #[structopt(name = "loglevelset", about = "set log level (trace, debug, info, warn, error, critical)")]
+    LogLevelSet(LogLevelOption),
 }
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "mem-agent-ctl", about = "Memory agent controler")]
-struct Opt {
-    #[structopt(long, default_value = "unix:///var/run/mem-agent.sock")]
-    addr: String,
-
-    #[structopt(subcommand)]
-    command: Command,
+#[derive(Debug, StructOpt)]
+struct LogLevelOption {
+    #[structopt(name = "level")]
+    level: String,
 }
 
 #[tokio::main]
@@ -67,6 +76,17 @@ async fn main() -> Result<()> {
             let config = c.to_rpc_compact_config();
             client
                 .compact_set(ttrpc::context::with_timeout(0), &config)
+                .await
+                .map_err(|e| anyhow!("client.memcg_status fail: {}", e))?;
+        }
+
+        Command::LogLevelSet(c) => {
+            let config = mem_agent::LogLevel {
+                level: c.level.clone(),
+                ..Default::default()
+            };
+            client
+                .log_level_set(ttrpc::context::with_timeout(0), &config)
                 .await
                 .map_err(|e| anyhow!("client.memcg_status fail: {}", e))?;
         }
