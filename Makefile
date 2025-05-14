@@ -10,5 +10,8 @@ default:
 clean:
 	cargo clean
 
-test:
+sudo_test:
 	sudo -E env "PATH=$$PATH" cargo test
+
+sudo_clean:
+	sudo -E env "PATH=$$PATH" cargo clean
