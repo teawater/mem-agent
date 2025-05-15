@@ -48,6 +48,28 @@ sudo target/debug/mem-agent-srv
 ```
 
 # Configurations
+## config log
+### set the log file
+Set the log file.
+If not set, the log will be output to the current terminal.
+
+Set the log to file /var/log/mem_agent.log.
+```bash
+sudo target/debug/mem-agent-srv --log-file /var/log/mem_agent.log
+```
+### set the log level
+Set the log level to trace, debug, info, warn, error, or critical.
+Default to trace.
+
+Set the log level to debug.
+```bash
+sudo target/debug/mem-agent-srv --log-level debug
+```
+For a running mem-agent-srv, this configuration can be dynamically modified using the mem-agent-ctl command.
+```bash
+sudo target/debug/mem-agent-ctl loglevelset debug
+```
+
 ## Feature MemCG
 ### memcg_disable
 Control the mem-agent memcg function disable or enable.<br>
