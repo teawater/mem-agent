@@ -3,8 +3,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use anyhow::{anyhow, Result};
-use nix::sys::statfs::{statfs, CGROUP2_SUPER_MAGIC};
+use nix::sys::statfs::statfs;
 use std::path::Path;
+
+#[cfg(target_env = "musl")]
+const CGROUP2_SUPER_MAGIC: nix::sys::statfs::FsType = nix::sys::statfs::FsType(0x63677270);
+#[cfg(not(target_env = "musl"))]
+use nix::sys::statfs::CGROUP2_SUPER_MAGIC;
 
 pub const CGROUP_PATH: &str = "/sys/fs/cgroup/";
 pub const MEMCGS_V1_PATH: &str = "/sys/fs/cgroup/memory";
