@@ -1,6 +1,7 @@
 # Introduction
 **mem-agent** is a software written in Rust, designed for managing memory and reducing memory usage in Linux environments.<br>
 It can be executed as a standalone executable file or integrated as a rust library into other Rust projects.<br>
+The mem-agent offers a wide range of configurable options that can be tailored as needed, with most of them supporting dynamic configuration.<br>
 <br>
 The mem-agent has been integrated into the kata-agent as a library.
 https://github.com/kata-containers/kata-containers/blob/main/docs/how-to/how-to-use-memory-agent.md
