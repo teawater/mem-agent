@@ -72,7 +72,9 @@ sudo target/debug/mem-agent-ctl loglevelset debug
 ```
 
 ## Feature MemCG
-### memcg_disable
+### Base configuration
+For memory cgroups that are not individually configured with the --memcg-cgroups parameter (as detailed below), their memory reclamation will be governed by the following configurations.
+#### memcg_disable
 Control the mem-agent memcg function disable or enable.<br>
 Default to false.
 
@@ -86,7 +88,7 @@ For a running mem-agent-srv, this configuration can be dynamically modified usin
 sudo target/debug/mem-agent-ctl memcgset --memcg-disabled true
 ```
 
-### memcg_swap
+#### memcg_swap
 If this feature is disabled, the mem-agent will only track and reclaim file cache pages.  If this feature is enabled, the mem-agent will handle both file cache pages and anonymous pages.<br>
 Default to false.
 
@@ -100,7 +102,7 @@ For a running mem-agent-srv, this configuration can be dynamically modified usin
 sudo target/debug/mem-agent-ctl memcgset --memcg-swap true
 ```
 
-### memcg_swappiness_max
+#### memcg_swappiness_max
 The usage of this value is similar to the swappiness in the Linux kernel, applying a ratio of swappiness_max/200 when utilized.<br>
 At the beginning of the eviction memory process for a cgroup in each run period, the coldest anonymous pages are assigned a maximum eviction value based on swappiness_max/200.<br>
 When the run_eviction function of MgLRU is actually called, if the comparison ratio between the current coldest anonymous pages and file cache pages exceeds this value, then this value will be used as the swappiness.<br>
@@ -116,7 +118,7 @@ For a running mem-agent-srv, this configuration can be dynamically modified usin
 sudo target/debug/mem-agent-ctl memcgset --memcg-swappiness-max 50
 ```
 
-### memcg_period_secs
+#### memcg_period_secs
 Control the mem-agent memcg function wait period seconds.<br>
 Default to 600.
 
@@ -130,7 +132,7 @@ For a running mem-agent-srv, this configuration can be dynamically modified usin
 sudo target/debug/mem-agent-ctl memcgset --memcg-period-secs 600
 ```
 
-### memcg_period_psi_percent_limit
+#### memcg_period_psi_percent_limit
 Control the mem-agent memcg wait period PSI percent limit.<br>
 If the percentage of memory and IO PSI stall time within the memcg waiting period for a cgroup exceeds this value, then the memcg run period for this cgroup will not be executed after this waiting period.<br>
 Default to 1
@@ -145,7 +147,7 @@ For a running mem-agent-srv, this configuration can be dynamically modified usin
 sudo target/debug/mem-agent-ctl memcgset --memcg-period-psi-percent-limit 1
 ```
 
-### memcg_eviction_psi_percent_limit
+#### memcg_eviction_psi_percent_limit
 Control the mem-agent memcg eviction PSI percent limit.<br>
 If the percentage of memory and IO PSI stall time for a cgroup exceeds this value during an eviction cycle, the eviction for this cgroup will immediately stop and will not resume until the next memcg waiting period.<br>
 Default to 1.
@@ -160,7 +162,7 @@ For a running mem-agent-srv, this configuration can be dynamically modified usin
 sudo target/debug/mem-agent-ctl memcgset --memcg-eviction-psi-percent-limit 1
 ```
 
-### memcg_eviction_run_aging_count_min
+#### memcg_eviction_run_aging_count_min
 Control the mem-agent memcg eviction run aging count min.<br>
 A cgroup will only perform eviction when the number of aging cycles in memcg is greater than or equal to memcg_eviction_run_aging_count_min.<br>
 Default to 3.
@@ -174,6 +176,59 @@ For a running mem-agent-srv, this configuration can be dynamically modified usin
 ```bash
 sudo target/debug/mem-agent-ctl memcgset --memcg-eviction-run-aging-count-min 3
 ```
+
+### configuration for special memory cgroups and NUMA
+If you need to configure specific memory cgroups and NUMA with custom settings rather than using default configurations, you can utilize the following configuration.
+
+#### Set configuration as the option of mem-agent-srv
+The following command starts the mem-agent server with three custom memory cgroup configurations:
+1. For the memory cgroup /system.slice/ModemManager.service and its subdirectories NUMA nodes 1 and 2 only (explicitly excluding other nodes):
+* Sets period-secs = 300
+* All other configurations retain default values
+2. For the memory cgroup /system.slice/snapd.socket (excluding its subdirectories):
+* Sets period-psi-percent-limit = 10
+* All other configurations retain default values
+3. For /system.slice/bolt.service and its subdirectories:
+* All memcg features are disabled
+
+All other memory cgroups and NUMA nodes across the system will use the base configurations.
+```bash
+sudo target/debug/mem-agent-srv --memcg-cgroups path=/system.slice/ModemManager.service,numa-id=1:2,period-secs=300 path=/system.slice/snapd.socket,no-subdir=true,period-psi-percent-limit=10 path=/system.slice/bolt.service,disabled=true
+```
+following is the sub-configurations of --memcg-cgroups:
+* path: The path of the memory cgroup to be configured.
+* nuima-id: The NUMA node ids ( separated by : ) to be configured.
+* no-subdir: If true, the sub-directory of path will not be configured.
+* disabled: If true, All memcg features are disabled for this path.
+* swap: Same with the base configuration --memcg-swap.
+* swappiness-max: Same with the base configuration --memcg-swappiness-max.
+* period-secs: Same with the base configuration --memcg-period-secs.
+* period-psi-percent-limit: Same with the base configuration --memcg-period-psi-percent-limit.
+* eviction-psi-percent-limit: Same with the base configuration --memcg-eviction-psi-percent-limit.
+* eviction-run-aging-count-min: Same with the base configuration --memcg-eviction-run-aging-count-min.
+
+#### Set configuration as the option of mem-agent-ctl
+##### Add
+Add special configuration for some memory cgroups.
+```bash
+sudo target/debug/mem-agent-ctl memcgset --memcg-add path=/system.slice/ModemManager.service,numa-id=1:2,period-secs=300 path=/system.slice/snapd.socket,no-subdir=true,period-psi-percent-limit=10 path=/system.slice/bolt.service,disabled=true
+```
+The sub-configurations of --memcg-add are same with --memcg-cgroups of mem-agent-srv.
+##### Delete
+Delete special configuration for some memory cgroups.
+```bash
+sudo target/debug/mem-agent-ctl memcgset --memcg-del path=/system.slice/ModemManager.service,numa-id=1:2 path=/system.slice/snapd.socket path=/system.slice/bolt.service
+```
+following is the sub-configurations of --memcg-del:
+* path: The path of the memory cgroup to be configured.
+* nuima-id: The NUMA node ids ( separated by : ) to be configured.
+
+##### Update
+Update special configuration for some memory cgroups.
+```bash
+sudo target/debug/mem-agent-ctl memcgset --memcg-set path=/system.slice/ModemManager.service,numa-id=1:2,disabled=true path=/system.slice/snapd.socket,period-secs=300 path=/system.slice/bolt.service,disabled=false
+```
+The sub-configurations of --memcg-set are same with --memcg-cgroups of mem-agent-srv.
 
 ## Feature compact
 ### compact_disable
