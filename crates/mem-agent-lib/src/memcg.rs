@@ -430,7 +430,6 @@ struct EvictionInfo {
     anon_page_count: u64,
 
     only_swap_mode: bool,
-    anon_eviction_max: u64,
 
     stop_reason: EvictionStopReason,
 }
@@ -1119,7 +1118,6 @@ impl MemCG {
                 file_page_count: 0,
                 anon_page_count: 0,
                 only_swap_mode: false,
-                anon_eviction_max: 0,
                 stop_reason: EvictionStopReason::None,
             });
         }
@@ -1152,23 +1150,14 @@ impl MemCG {
                         trace!("{} {} run_eviction begin", ci.path, ci.numa_id,);
                         if ci.min_lru_file == 0 {
                             if !swap || ci.min_lru_anon == 0 {
-                                info!(
-                                "{} {} run_eviction stop because min_lru_file is 0 or min_lru_anon is 0, release {} {} pages",
-                                ci.path, ci.numa_id, ei.anon_page_count, ei.file_page_count,
-                            );
+                                info!("{} {} run_eviction stop because min_lru_file is 0 or min_lru_anon is 0, release {} {} pages",
+                                      ci.path, ci.numa_id, ei.anon_page_count, ei.file_page_count);
                                 ei.stop_reason = EvictionStopReason::NoMinLru;
                                 removed_infov.push(infov.remove(i));
                                 continue;
                             } else {
                                 ei.only_swap_mode = true;
-                                ei.anon_eviction_max =
-                                    ci.min_lru_anon * config.swappiness_max as u64 / 200;
-                                trace!(
-                                    "{} {} run_eviction only swap mode anon_eviction_max {}",
-                                    ci.path,
-                                    ci.numa_id,
-                                    ei.anon_eviction_max
-                                );
+                                trace!("{} {} run_eviction only swap mode", ci.path, ci.numa_id,);
                             }
                         }
 
@@ -1217,16 +1206,6 @@ impl MemCG {
                                 removed_infov.push(infov.remove(i));
                                 continue;
                             }
-                        } else {
-                            if ei.anon_page_count >= ei.anon_eviction_max {
-                                info!(
-                                "{} {} run_eviction stop because anon_page_count is bigger than anon_eviction_max {}, release {} {} pages",
-                                ci.path, ci.numa_id, ei.anon_eviction_max, ei.anon_page_count, ei.file_page_count,
-                            );
-                                ei.stop_reason = EvictionStopReason::NoMinLru;
-                                removed_infov.push(infov.remove(i));
-                                continue;
-                            }
                         }
 
                         let percent = match ei.psi.get_percent() {
@@ -1255,19 +1234,27 @@ impl MemCG {
                         ei.last_min_lru_anon = ci.min_lru_anon;
                     }
 
+                    let swap_not_available = match self.swap_not_available() {
+                        Ok(b) => b,
+                        Err(e) => {
+                            ret = Err(anyhow!("swap_not_available failed: {:?}", e));
+                            break 'main_loop;
+                        }
+                    };
+
                     // get swapiness
                     let swappiness = if ei.only_swap_mode {
-                        200
-                    } else if !swap
-                        || ci.min_lru_anon == 0
-                        || match self.swap_not_available() {
-                            Ok(b) => b,
-                            Err(e) => {
-                                ret = Err(anyhow!("swap_not_available failed: {:?}", e));
-                                break 'main_loop;
-                            }
+                        if swap_not_available {
+                            info!(
+                                "{} {} run_eviction stop because only_swap_mode and swap_not_available, release {} {} pages",
+                                ci.path, ci.numa_id, ei.anon_page_count, ei.file_page_count,
+                            );
+                            ei.stop_reason = EvictionStopReason::NoMinLru;
+                            removed_infov.push(infov.remove(i));
+                            continue;
                         }
-                    {
+                        200
+                    } else if !swap || ci.min_lru_anon == 0 || swap_not_available {
                         0
                     } else {
                         let s = self.get_swappiness(ci.min_lru_anon, ci.min_lru_file);
