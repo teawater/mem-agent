@@ -1038,7 +1038,7 @@ impl MemCG {
                     "{} not run aging because last_inc_time {}",
                     info.path, info.last_inc_time,
                 );
-                true
+                false
             } else {
                 let res = if let Err(e) =
                     mglru::run_aging(info.memcg_id, info.numa_id, info.max_seq, swap, true)
