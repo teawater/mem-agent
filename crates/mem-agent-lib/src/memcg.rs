@@ -1127,19 +1127,19 @@ impl MemCG {
         let mut ret = Ok(());
 
         'main_loop: while infov.len() != 0 {
+            // update infov
+            let path_set: HashSet<String> = infov.iter().map(|info| info.path.clone()).collect();
+            match self.refresh(&path_set) {
+                Ok(_) => {}
+                Err(e) => {
+                    ret = Err(anyhow!("refresh failed: {}", e));
+                    break 'main_loop;
+                }
+            };
+            self.update_info(infov);
+
             let mut i = 0;
             while i < infov.len() {
-                let path_set: HashSet<String> =
-                    infov.iter().map(|info| info.path.clone()).collect();
-                match self.refresh(&path_set) {
-                    Ok(_) => {}
-                    Err(e) => {
-                        ret = Err(anyhow!("refresh failed: {}", e));
-                        break 'main_loop;
-                    }
-                };
-                self.update_info(infov);
-
                 let ci = infov[i].clone();
 
                 trace!("{} {} run_eviction single loop start", ci.path, ci.numa_id);
