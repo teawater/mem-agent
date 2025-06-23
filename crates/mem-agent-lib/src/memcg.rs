@@ -1145,6 +1145,14 @@ impl MemCG {
                 trace!("{} {} run_eviction single loop start", ci.path, ci.numa_id);
 
                 if let Some(ref mut ei) = infov[i].eviction {
+                    if ci.max_seq - ci.min_seq + 1 != mglru::MAX_NR_GENS {
+                        info!("{} {} run_eviction stop because max seq {} min seq {} not fit MAX_NR_GENS, release {} {} pages",
+                                      ci.path, ci.numa_id, ci.max_seq, ci.min_seq, ei.anon_page_count, ei.file_page_count);
+                        ei.stop_reason = EvictionStopReason::None;
+                        removed_infov.push(infov.remove(i));
+                        continue;
+                    }
+
                     if ei.last_min_lru_file == 0 && ei.last_min_lru_anon == 0 {
                         // First loop
                         trace!("{} {} run_eviction begin", ci.path, ci.numa_id,);

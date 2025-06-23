@@ -18,6 +18,7 @@ const WORKINGSET_ANON: usize = 0;
 const WORKINGSET_FILE: usize = 1;
 const LRU_GEN_ENABLED_PATH: &str = "/sys/kernel/mm/lru_gen/enabled";
 const LRU_GEN_PATH: &str = "/sys/kernel/debug/lru_gen";
+pub const MAX_NR_GENS: u64 = 4;
 
 fn lru_gen_head_parse(line: &str) -> Result<(usize, String)> {
     let words: Vec<&str> = line.split_whitespace().map(|word| word.trim()).collect();
