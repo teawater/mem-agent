@@ -1181,9 +1181,8 @@ impl MemCG {
                         ei.last_min_lru_file = ci.min_lru_file;
                         ei.last_min_lru_anon = ci.min_lru_anon;
                     } else {
-                        if (!ei.only_swap_mode && ci.min_lru_file >= ei.last_min_lru_file)
-                            || (ei.only_swap_mode && ci.min_lru_file > 0)
-                            || (swap && ci.min_lru_anon > ei.last_min_lru_anon)
+                        if ci.min_lru_file >= ei.last_min_lru_file
+                            && ci.min_lru_anon >= ei.last_min_lru_anon
                         {
                             info!(
                                 "{} {} run_eviction stop because min_lru_file {} last_min_lru_file {} min_lru_anon {} last_min_lru_anon {}, release {} {} pages",
