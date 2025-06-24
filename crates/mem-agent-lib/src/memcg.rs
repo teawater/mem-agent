@@ -956,6 +956,16 @@ pub struct MemCG {
     memcgs: Arc<RwLock<MemCgroups>>,
 }
 
+fn div_round(a: u64, b: u64) -> u64 {
+    let quotient = a / b;
+    let remainder = a % b;
+    if remainder >= b - remainder {
+        quotient + 1
+    } else {
+        quotient
+    }
+}
+
 impl MemCG {
     pub fn new(is_cg_v2: bool, mut config: Config) -> Result<Self> {
         mglru::check().map_err(|e| anyhow!("mglru::check failed: {}", e))?;
@@ -1079,8 +1089,7 @@ impl MemCG {
             "anon and file must be non-zero"
         );
 
-        let total = anon_count + file_count;
-        let c = 200 * anon_count / total;
+        let c = div_round(200 * anon_count, anon_count + file_count);
 
         c as u8
     }
