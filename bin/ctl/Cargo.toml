@@ -8,7 +8,7 @@ structopt = "0.3"
 anyhow = "1.0"
 libc = "0.2"
 ttrpc = { version = "0.8", features = ["async"] }
-tokio = { version = "1.33", features = ["full"] }
+tokio = { version = "1.45.1", features = ["full"] }
 
 share = {path = "../../crates/share"}
 protocols = {path = "../../crates/protocols"}
