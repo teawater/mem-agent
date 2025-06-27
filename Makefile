@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-.PHONY: default clean
+.PHONY: default clean sudo_test sudo_clean
 
 default:
 	cargo build --workspace
