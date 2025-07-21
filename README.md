@@ -32,16 +32,47 @@ If the system pressure becomes too high, memory reclamation or compaction will a
 This feature helps the mem-agent reduce its overhead on system performance.
 
 # Quick start
+## Linux kernel
 Make sure current Linux kernel open PSI and mgLRU option.
 ```
 CONFIG_PSI=y
 CONFIG_LRU_GEN=y
 ```
+For openEuler using cgroup v2, also ensure the following option is enabled:
+```
+CONFIG_PSI_CGROUP_V1=y
+```
+## Build mem-agent
 To build mem-agent, make sure Rust 1.75 or newer version is installed (https://www.rust-lang.org/tools/install).
 ```
 cd mem-agent
 make
 ```
+## Open PSI in grub
+### Update /etc/default/grub
+Add "psi=1" to /etc/default/grub.
+```
+sudo sed -i '/^GRUB_CMDLINE_LINUX=/ { /psi=1/! s/"$/ psi=1"/ }' /etc/default/grub
+```
+
+For openEuler using cgroup v2, add "psi=1 psi_v1=1" to /etc/default/grub.
+```
+sudo sed -i '/^GRUB_CMDLINE_LINUX=/ { /psi=1/!s/"$/ psi=1"/; /psi_v1=1/!s/"$/ psi_v1=1"/; }' /etc/default/grub
+```
+### Update grub config
+For the system that has "update-grub".
+```
+sudo update-grub
+```
+
+For the others.
+```
+sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+```
+
+Reboot after update grub config.
+
+## Run mem-agent
 Run mem-agent, and it will automatically start detecting system status and reclaiming cold memory.
 ```
 cd mem-agent
