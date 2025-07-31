@@ -137,9 +137,14 @@ impl Period {
         let mut psi = self
             .get_path_pressure_us(MEM_PSI)
             .map_err(|e| anyhow!("get_path_pressure_us MEM_PSI {:?} failed: {}", self.path, e))?;
-        psi += self
+        let io_psi = self
             .get_path_pressure_us(IO_PSI)
             .map_err(|e| anyhow!("get_path_pressure_us IO_PSI {:?} failed: {}", self.path, e))?;
+
+        if psi < io_psi {
+            // use the biggest psi as the current psi.
+            psi = io_psi;
+        }
 
         let mut percent = 0;
 
