@@ -110,22 +110,13 @@ impl CompactCore {
         if crate::misc::is_test_environment() {
             return false;
         }
-        let percent = match self.psi.get_percent() {
-            Ok(v) => v,
-            Err(e) => {
-                debug!("psi.get_percent failed: {}", e);
-                return false;
-            }
-        };
-        if percent > self.config.period_psi_percent_limit as u64 {
-            info!(
-                "compact will not work because period psi {}% exceeds limit",
-                percent
-            );
-            false
-        } else {
-            true
-        }
+
+        self.psi
+            .compare_percent_maybe_update(self.config.period_psi_percent_limit as u64)
+            .unwrap_or_else(|e| {
+                error!("psi.compare_percent_maybe_update failed: {}", e);
+                false
+            })
     }
 
     fn need_force_compact(&self) -> bool {

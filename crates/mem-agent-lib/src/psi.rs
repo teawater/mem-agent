@@ -132,14 +132,19 @@ impl Period {
         Ok(parent_val)
     }
 
-    pub fn get_percent(&mut self) -> Result<u64> {
+    fn get_percent_no_update_last(&mut self) -> Result<(u64, u64, DateTime<Utc>)> {
         let now = Utc::now();
         let mut psi = self
             .get_path_pressure_us(MEM_PSI)
             .map_err(|e| anyhow!("get_path_pressure_us MEM_PSI {:?} failed: {}", self.path, e))?;
-        psi += self
+        let io_psi = self
             .get_path_pressure_us(IO_PSI)
             .map_err(|e| anyhow!("get_path_pressure_us IO_PSI {:?} failed: {}", self.path, e))?;
+
+        if psi < io_psi {
+            // use the biggest psi as the current psi.
+            psi = io_psi;
+        }
 
         let mut percent = 0;
 
@@ -151,10 +156,28 @@ impl Period {
             }
         }
 
+        Ok((percent, psi, now))
+    }
+
+    pub fn get_percent(&mut self) -> Result<u64> {
+        let (percent, psi, now) = self.get_percent_no_update_last()?;
+
         self.last_psi = psi;
         self.last_update_time = now;
 
         Ok(percent)
+    }
+
+    pub fn compare_percent_maybe_update(&mut self, limit: u64) -> Result<bool> {
+        let (percent, psi, now) = self.get_percent_no_update_last()?;
+
+        if percent > limit {
+            Ok(false)
+        } else {
+            self.last_psi = psi;
+            self.last_update_time = now;
+            Ok(true)
+        }
     }
 }
 

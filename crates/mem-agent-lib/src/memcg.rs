@@ -330,18 +330,9 @@ impl Numa {
     }
 
     fn check_psi(&mut self, limit: u64) -> Result<bool> {
-        let percent = self
-            .psi
-            .get_percent()
-            .map_err(|e| anyhow!("psi.get_percent failed: {}", e))?;
-
-        if percent > limit {
-            info!("period psi {}% exceeds limit {}%", percent, limit);
-            self.sleep_psi_exceeds_limit += 1;
-            Ok(false)
-        } else {
-            Ok(true)
-        }
+        self.psi
+            .compare_percent_maybe_update(limit)
+            .map_err(|e| anyhow!("psi.compare_percent_maybe_update failed: {}", e))
     }
 }
 

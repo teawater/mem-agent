@@ -165,7 +165,7 @@ sudo target/debug/mem-agent-ctl memcgset --memcg-period-secs 600
 
 #### memcg_period_psi_percent_limit
 Control the mem-agent memcg wait period PSI percent limit.<br>
-If the percentage of memory and IO PSI stall time within the memcg waiting period for a cgroup exceeds this value, then the memcg run period for this cgroup will not be executed after this waiting period.<br>
+Execution of the memcg run period for a cgroup will resume ​only when the aggregate percentage of memory or IO PSI (use the bigger one) stall time across all its accumulated pending waiting periods falls below this threshold.​​<br>
 Default to 1
 
 Set this configuration when start mem-agent-srv:
@@ -180,7 +180,7 @@ sudo target/debug/mem-agent-ctl memcgset --memcg-period-psi-percent-limit 1
 
 #### memcg_eviction_psi_percent_limit
 Control the mem-agent memcg eviction PSI percent limit.<br>
-If the percentage of memory and IO PSI stall time for a cgroup exceeds this value during an eviction cycle, the eviction for this cgroup will immediately stop and will not resume until the next memcg waiting period.<br>
+If the percentage of memory or IO PSI (use the bigger one) stall time for a cgroup exceeds this value during an eviction cycle, the eviction for this cgroup will immediately stop and will not resume until the next memcg waiting period.<br>
 Default to 1.
 
 Set this configuration when start mem-agent-srv:
@@ -292,10 +292,10 @@ sudo target/debug/mem-agent-ctl compactset --compact-period-secs 600
 
 ### compact_period_psi_percent_limit
 Control the mem-agent compaction function wait period PSI percent limit.<br>
-If the percentage of memory and IO PSI stall time within the compaction waiting period exceeds this value, then the compaction will not be executed after this waiting period.<br>
+Execution of the compact run period for a cgroup will resume ​only when the aggregate percentage of memory or IO PSI (use the bigger one) stall time across all its accumulated pending waiting periods falls below this threshold.​​<br>
 Default to 1.
 
-Set memcg_disable when start mem-agent-srv:
+Set compact_period_psi_percent_limit when start mem-agent-srv:
 ```bash
 sudo target/debug/mem-agent-srv --compact-period-psi-percent-limit 1
 ```
@@ -307,7 +307,7 @@ sudo target/debug/mem-agent-ctl compactset --compact-period-psi-percent-limit 1
 
 ### compact_psi_percent_limit
 Control the mem-agent compaction function compact PSI percent limit.<br>
-During compaction, the percentage of memory and IO PSI stall time is checked every second. If this percentage exceeds compact_psi_percent_limit, the compaction process will stop.<br>
+During compaction, the percentage of memory or IO PSI (use the bigger one) stall time is checked every second. If this percentage exceeds compact_psi_percent_limit, the compaction process will stop.<br>
 Default to 5
 
 Set memcg_disable when start mem-agent-srv:
